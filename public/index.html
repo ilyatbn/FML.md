@@ -338,7 +338,7 @@
         <h3>It will</h3>
         <ul class="does">
           <li>Give you the <strong>file and the line</strong></li>
-          <li>Answer <strong>"why?"</strong> — one line, if you ask</li>
+          <li>Answer <strong>"why?"</strong> in plain words, if you ask</li>
           <li>Make the change when you ask for the change</li>
           <li>Tell you you're <strong>wrong</strong> — then build it if you insist</li>
           <li>Name <strong>who can now do what</strong> when you widen access</li>
@@ -351,6 +351,7 @@
           <li>Recap what it just did</li>
           <li>Ask if you'd like anything else</li>
           <li>Make the same argument twice</li>
+          <li>Hide behind jargon to sound short</li>
           <li>Insult you — the frustration is aimed at <strong>the code</strong></li>
         </ul>
       </div>
@@ -368,48 +369,54 @@
 (() => {
   const EX = [
     { q: "how do I center a div",
-      a: [["display: grid; place-items: center", "code"], [". On the parent."]] },
+      a: [["display: grid; place-items: center", "code"], [" on the parent. that's it."]] },
 
     { q: "why is my docker image 4 gigs",
-      a: [["Aha. "], ["Dockerfile:7", "file"], [" — "], ["COPY . .", "code"],
-          [" with no "], [".dockerignore", "code"], [", so "], ["node_modules", "code"],
-          [" and "], [".git", "code"], [" ship with it."]] },
+      a: [["because you're copying everything, so you get everything. "],
+          ["Dockerfile:7", "file"], [" — "], ["COPY . .", "code"], [" with no "],
+          [".dockerignore", "code"], [" hauls in "], ["node_modules", "code"], [" and "],
+          [".git", "code"], [". copy less shit, get a smaller image."]] },
 
     { q: "tests pass locally, fail in CI, no idea why",
-      a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
+      a: [["src/billing.test.ts:88", "file"],
+          [" — the test uses your timezone, CI runs on UTC. that's the entire difference."]] },
 
-    { q: "just make the test pass, we'll fix it after launch",
-      a: [["Aha. The test is right — "], ["user.service.ts:61", "file"], [" returns "],
-          ["undefined", "code"], [" on a 404 and the caller "], [".map()", "code"], ["s it."]] },
+    { q: "deploy succeeded but prod is serving old code",
+      a: [["it's the cache. it's always the cache. the CDN is still handing out the old "],
+          ["index.html", "code"], [" — never cache the html, and put a hash in the asset filenames."]] },
 
     { q: "can you add comments explaining this function?",
-      a: [["No. Renamed the variables instead — "], ["auth.ts:14-31", "file"], ["."]] },
+      a: [["no. renamed the variables instead — "], ["auth.ts:14-31", "file"],
+          [". it says what it does now without a paragraph on top."]] },
 
     { q: "we're thinking about moving to microservices",
-      a: [["You have four engineers and one database. Don't."]] },
+      a: [["you have four engineers and one database. you'd get all of the network problems and none of the upside. don't."]] },
 
-    { q: "wrap the payment call in a retry-until-success loop",
-      a: [["No. A timeout isn't a failure — you'll double-charge people. Idempotency key, three attempts."]],
-      q2: "do it anyway, we ship Friday",
-      a2: [["Yeah, yeah. "], ["payments.ts:88", "file"], ["."]] },
+    { q: "hash the passwords with md5, we'll upgrade later",
+      a: [["no. md5 is fast, which is the opposite of what you want here — anyone with the table cracks the easy ones in minutes. "],
+          ["argon2id", "code"], [", one line, same afternoon."]],
+      q2: "internal tool, nobody cares, do it",
+      a2: [["fine. "], ["hash.py:12", "file"],
+           [". whoever gets a copy of that table gets everyone's password."]] },
 
-    { q: "drop permission_classes on the export view, the frontend already checks",
-      a: [["Whatever, it's done — "], ["views.py:112", "file"],
-          [". Anyone unauthenticated can now GET every customer's export."]] },
+    { q: "drop permission_classes on the export view, the frontend checks already",
+      a: [["done — "], ["views.py:112", "file"],
+          [". anyone with the URL and no login can pull every customer's export now."]] },
 
     { q: "can we detect windows/mac/linux and show one install line? if yes, do it",
-      a: [["Yeah. "], ["index.html:301", "file"], [" — one snippet off "],
-          ["navigator.userAgentData", "code"], [", toggle for the other. No-JS gets both."]] },
+      a: [["yeah. "], ["index.html:301", "file"], [" — one snippet, picked from "],
+          ["navigator.userAgentData", "code"], [", with a toggle for the other. no-JS still gets both."]] },
 
     { q: "is it fine to keep the JWT in localStorage",
-      a: [["No. Any XSS reads it. httpOnly, Secure, SameSite=Lax cookie."]] },
+      a: [["no. any javascript on the page can read it, including whatever snuck in through a package you don't read. a cookie marked "],
+          ["httpOnly", "code"], [" can't be read by js at all."]] },
 
     { q: "fix the race in the upload handler",
-      a: [["upload.ts:52", "file"], [" — read-modify-write swapped for "],
-          ["UPDATE … WHERE version = $1", "code"], [". Retries on conflict."]] },
+      a: [["upload.ts:52", "file"],
+          [" — one update that checks the version while it writes, instead of read-then-write. if someone got there first it retries."]] },
 
     { q: "why did that fix it",
-      a: [["Two requests read the same row before either wrote. Now the write is atomic."]] },
+      a: [["before, two requests could read the same row at the same moment and both write over each other. now the write checks the version as it goes, so only one wins."]] },
   ];
 
   const stage = document.getElementById("stage");
