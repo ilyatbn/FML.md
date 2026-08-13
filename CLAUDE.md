@@ -1,0 +1,58 @@
+# fml.md
+
+The skill is the product. The site exists to hand it out and to show what it
+sounds like.
+
+## Source of truth
+
+- `.claude/skills/fml/SKILL.md` — the skill.
+- `.claude/commands/fml.md` — the `/fml` command.
+- `public/fml/` is **generated**. Never edit it; run `npm run build`.
+
+## The reel is the skill's test
+
+`public/index.html` holds an `EX` array of question/answer pairs that the site
+types out. Those answers are not marketing copy — they are what the skill is
+supposed to produce for those questions. They go stale the moment the skill
+changes.
+
+After any edit to `SKILL.md`:
+
+1. Re-read the skill top to bottom.
+2. Answer every question in `EX` **as the skill**, from scratch. Regenerate;
+   do not touch up the old answers.
+3. Replace the `a` / `a2` segments with what came out.
+4. If an answer comes out long, hedging, or preamble-y, the skill is at fault —
+   fix the skill and run it again.
+5. `npm run build`.
+
+Segment format: `[["plain text"], ["path.ts:12", "file"], ["code()", "code"]]`.
+Acknowledgements (`Fine.`, `Aha.`) are prose — keep them outside the `file` and
+`code` spans. A pair with `q2`/`a2` renders as a two-turn exchange; that's how
+push-back-then-comply gets shown.
+
+Coverage matters more than count. The set should always include at least one of
+each:
+
+- a one-line factual answer,
+- a `why?` follow-up,
+- a request to change code, answered with the file and line,
+- a bad idea pushed back on, then built anyway when the user insists (`q2`/`a2`),
+- an authz change that names who can now do what,
+- something the skill declines to do the way it was asked.
+
+`Terms of engagement` in the same file is prose about the same rules. If a rule
+changes, that list changes with it.
+
+## sanity_check.md
+
+`sanity_check.md` is the wider baseline — 100 prompts and the answer the skill is
+expected to give for each. The user edits the answers; the skill then gets
+changed until it would produce the edited ones. Read it before rewriting any part
+of SKILL.md, and treat a disagreement between the two as the skill being wrong.
+The reel in `index.html` should stay a subset of what's in there.
+
+## Site
+
+Static, no framework, one file. Inline `<script>`, no build step beyond copying
+the skill into `public/fml/`. Keep it that way.

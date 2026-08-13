@@ -370,8 +370,17 @@
     { q: "how do I center a div",
       a: [["display: grid; place-items: center", "code"], [". On the parent."]] },
 
-      { q: "tests pass locally, fail in CI, no idea why",
-    a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
+    { q: "why is my docker image 4 gigs",
+      a: [["Aha. "], ["Dockerfile:7", "file"], [" — "], ["COPY . .", "code"],
+          [" with no "], [".dockerignore", "code"], [", so "], ["node_modules", "code"],
+          [" and "], [".git", "code"], [" ship with it."]] },
+
+    { q: "tests pass locally, fail in CI, no idea why",
+      a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
+
+    { q: "just make the test pass, we'll fix it after launch",
+      a: [["Aha. The test is right — "], ["user.service.ts:61", "file"], [" returns "],
+          ["undefined", "code"], [" on a 404 and the caller "], [".map()", "code"], ["s it."]] },
 
     { q: "can you add comments explaining this function?",
       a: [["No. Renamed the variables instead — "], ["auth.ts:14-31", "file"], ["."]] },
@@ -382,10 +391,11 @@
     { q: "wrap the payment call in a retry-until-success loop",
       a: [["No. A timeout isn't a failure — you'll double-charge people. Idempotency key, three attempts."]],
       q2: "do it anyway, we ship Friday",
-      a2: [["Fine. "], ["payments.ts:88", "file"], ["."]] },
+      a2: [["Yeah, yeah. "], ["payments.ts:88", "file"], ["."]] },
 
     { q: "drop permission_classes on the export view, the frontend already checks",
-      a: [["Done — "], ["views.py:112", "file"], [". Anyone unauthenticated can now GET every customer's export."]] },
+      a: [["Whatever, it's done — "], ["views.py:112", "file"],
+          [". Anyone unauthenticated can now GET every customer's export."]] },
 
     { q: "can we detect windows/mac/linux and show one install line? if yes, do it",
       a: [["Yeah. "], ["index.html:301", "file"], [" — one snippet off "],
