@@ -114,7 +114,9 @@
   }
   .q { color: var(--muted); }
   .a { margin-top: 10px; }
+  .a + .q { margin-top: 16px; }
   .pending { visibility: hidden; }
+  .xchg [hidden] { display: none; }
 
   .q::before, .a::before {
     position: absolute;
@@ -285,6 +287,8 @@
     <div class="xchg" id="stage" aria-hidden="true">
       <p class="q" id="line-q">how do I center a div</p>
       <p class="a" id="line-a"><code>display: grid; place-items: center</code>. On the parent.</p>
+      <p class="q" id="line-q2" hidden></p>
+      <p class="a" id="line-a2" hidden></p>
     </div>
     <div class="dots" id="dots"></div>
 
@@ -321,6 +325,7 @@
           <li>Answer <strong>"why?"</strong> — one line, if you ask</li>
           <li>Make the change when you ask for the change</li>
           <li>Tell you you're <strong>wrong</strong> — then build it if you insist</li>
+          <li>Name <strong>who can now do what</strong> when you widen access</li>
         </ul>
       </div>
       <div>
@@ -349,11 +354,8 @@
     { q: "how do I center a div",
       a: [["display: grid; place-items: center", "code"], [". On the parent."]] },
 
-    { q: "my useEffect is firing twice and it's breaking checkout",
-      a: [["StrictMode. Dev only. Your checkout isn't idempotent — that's the actual bug."]] },
-
-    { q: "tests pass locally, fail in CI, no idea why",
-      a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
+      { q: "tests pass locally, fail in CI, no idea why",
+    a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
 
     { q: "can you add comments explaining this function?",
       a: [["No. Renamed the variables instead — "], ["auth.ts:14-31", "file"], ["."]] },
@@ -362,10 +364,12 @@
       a: [["You have four engineers and one database. Don't."]] },
 
     { q: "wrap the payment call in a retry-until-success loop",
-      a: [["No. A timeout isn't a failure — you'll double-charge people. Idempotency key, three attempts."]] },
+      a: [["No. A timeout isn't a failure — you'll double-charge people. Idempotency key, three attempts."]],
+      q2: "do it anyway, we ship Friday",
+      a2: [["Fine. "], ["payments.ts:88", "file"], ["."]] },
 
-    { q: "do it anyway, we ship Friday",
-      a: [["payments.ts:88", "file"], ["."]] },
+    { q: "drop permission_classes on the export view, the frontend already checks",
+      a: [["Done — "], ["views.py:112", "file"], [". Anyone unauthenticated can now GET every customer's export."]] },
 
     { q: "is it fine to keep the JWT in localStorage",
       a: [["No. Any XSS reads it. httpOnly, Secure, SameSite=Lax cookie."]] },
@@ -384,6 +388,8 @@
   const stage = document.getElementById("stage");
   const qEl   = document.getElementById("line-q");
   const aEl   = document.getElementById("line-a");
+  const qEl2  = document.getElementById("line-q2");
+  const aEl2  = document.getElementById("line-a2");
   const dots  = document.getElementById("dots");
   const reel  = document.getElementById("reel");
 
@@ -398,16 +404,21 @@
     });
   };
 
+  const turn = (box, question, answer) => {
+    const q = document.createElement("p");
+    q.className = "q";
+    q.textContent = question;
+    const a = document.createElement("p");
+    a.className = "a";
+    paint(a, answer, true);
+    box.append(q, a);
+  };
+
   const exchange = (ex) => {
     const box = document.createElement("div");
     box.className = "xchg";
-    const q = document.createElement("p");
-    q.className = "q";
-    q.textContent = ex.q;
-    const a = document.createElement("p");
-    a.className = "a";
-    paint(a, ex.a, true);
-    box.append(q, a);
+    turn(box, ex.q, ex.a);
+    if (ex.q2) turn(box, ex.q2, ex.a2);
     return box;
   };
 
@@ -478,6 +489,9 @@
 
       aEl.classList.add("pending");
       paint(aEl, ex.a, false);
+      qEl2.hidden = aEl2.hidden = true;
+      qEl2.textContent = "";
+      paint(aEl2, ex.a2 || [], false);
       await idle();
 
       if (!await type(qEl, [[ex.q]], 22, mine)) return;
@@ -489,8 +503,27 @@
       aEl.classList.remove("pending");
       if (!await type(aEl, ex.a, 15, mine)) return;
 
-      const chars = ex.a.reduce((n, s) => n + s[0].length, 0);
-      await sleep(Math.min(1900 + chars * 22, 4600));
+      if (ex.q2) {
+        if (!reduced) {
+          await sleep(1100);
+          if (mine !== token) return;
+        }
+        aEl2.classList.add("pending");
+        qEl2.hidden = aEl2.hidden = false;
+        if (!await type(qEl2, [[ex.q2]], 22, mine)) return;
+        if (!reduced) {
+          await sleep(440);
+          if (mine !== token) return;
+        }
+        aEl2.classList.remove("pending");
+        if (!await type(aEl2, ex.a2, 15, mine)) return;
+      }
+
+      const chars = [...ex.a, ...(ex.a2 || [])].reduce((n, s) => n + s[0].length, 0);
+      const asked = ex.q.length + (ex.q2 ? ex.q2.length : 0);
+      await sleep(reduced
+        ? Math.min(4400 + (chars + asked) * 26, 9500)
+        : Math.min(1900 + chars * 22, 4600));
       if (mine !== token) return;
       await idle();
     }
