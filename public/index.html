@@ -106,7 +106,7 @@
     margin-bottom: 12px;
   }
 
-  .q, .a {
+  .q, .a, .n {
     position: relative;
     padding-left: 2.9em;
     min-height: 1.65em;
@@ -114,11 +114,26 @@
   }
   .q { color: var(--muted); }
   .a { margin-top: 10px; }
-  .a + .q { margin-top: 16px; }
+  .a + .q, .n + .q { margin-top: 16px; }
   .pending { visibility: hidden; }
   .xchg [hidden] { display: none; }
 
-  .q::before, .a::before {
+  .n {
+    margin-top: 14px;
+    padding-top: 12px;
+    padding-left: 4.4em;
+    border-top: 1px dashed var(--line);
+    color: #63636e;
+    font-size: 13px;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .q::before, .a::before, .n::before {
     position: absolute;
     left: 0;
     top: 4px;
@@ -128,6 +143,7 @@
   }
   .q::before { content: "you"; color: var(--muted); opacity: .6; }
   .a::before { content: "fml"; color: var(--amber); }
+  .n::before { content: "claude"; color: #63636e; top: 15px; }
 
   .a code, .lede code, li code, p code {
     background: #1d1d23;
@@ -171,6 +187,13 @@
   .dots button:hover { background: var(--muted); }
   .dots button[aria-current="true"] { background: var(--amber); }
   .dots:empty { display: none; }
+
+  .legend {
+    margin: 14px 0 0;
+    text-align: center;
+    font-size: 12px;
+    color: #63636e;
+  }
 
   .sr-only {
     position: absolute;
@@ -301,10 +324,12 @@
     <div class="xchg" id="stage" aria-hidden="true">
       <p class="q" id="line-q">how do I center a div</p>
       <p class="a" id="line-a"><code>display: grid; place-items: center</code>. On the parent.</p>
+      <p class="n" id="line-n" hidden></p>
       <p class="q" id="line-q2" hidden></p>
       <p class="a" id="line-a2" hidden></p>
     </div>
     <div class="dots" id="dots"></div>
+    <p class="legend">The greyed-out line is what you'd have got without the skill.</p>
 
     <div class="sr-only" id="reel"></div>
   </section>
@@ -369,59 +394,65 @@
 (() => {
   const EX = [
     { q: "how do I center a div",
-      a: [["display: grid; place-items: center", "code"], [" on the parent. that's it."]] },
+      a: [["display: grid; place-items: center", "code"], [" on the parent."]],
+      n: "Great question! There are several ways to center a div in CSS, and the best one depends on your use case. The most common approach is Flexbox: set display: flex on the parent, then justify-content: center and align-items: center. You could also use CSS Grid, or absolute positioning with a transform. Let me know which fits your layout and I can walk you through it!" },
 
     { q: "why is my docker image 4 gigs",
-      a: [["because you're copying everything, so you get everything. "],
-          ["Dockerfile:7", "file"], [" — "], ["COPY . .", "code"], [" with no "],
-          [".dockerignore", "code"], [" hauls in "], ["node_modules", "code"], [" and "],
-          [".git", "code"], [". copy less shit, get a smaller image."]] },
+      a: [["you copy everything, so you get everything. "], ["Dockerfile:7", "file"],
+          [" — no "], [".dockerignore", "code"], [", so "], ["node_modules", "code"],
+          [" and "], [".git", "code"], [" go in too."]],
+      n: "There are several possible reasons a Docker image might be larger than expected! Common culprits include copying unnecessary files into the build context, installing development dependencies, not using multi-stage builds, and choosing a heavier base image. Would you like me to walk through each of these and audit your Dockerfile together?" },
 
     { q: "tests pass locally, fail in CI, no idea why",
       a: [["src/billing.test.ts:88", "file"],
-          [" — the test uses your timezone, CI runs on UTC. that's the entire difference."]] },
+          [" — your timezone against UTC. that's the whole difference."]],
+      n: "That's a classic and frustrating situation! There are many reasons a test suite can pass locally but fail in CI: environment variables, timezone or locale differences, missing services, test ordering, filesystem case sensitivity, and node version drift, to name a few. Could you share the CI logs? I'd be happy to help narrow it down step by step." },
 
     { q: "deploy succeeded but prod is serving old code",
-      a: [["it's the cache. it's always the cache. the CDN is still handing out the old "],
-          ["index.html", "code"], [" — never cache the html, and put a hash in the asset filenames."]] },
+      a: [["it's the cache. it's always the cache. the CDN still has the old "],
+          ["index.html", "code"], ["."]],
+      n: "Caching can happen at several layers, so it's worth checking each one in turn: the browser cache, a service worker, your CDN, a reverse proxy, and finally the application server itself. I'd recommend starting with a hard refresh to rule out the browser. Would you like me to explain how to configure cache-control headers correctly for each layer?" },
 
     { q: "can you add comments explaining this function?",
-      a: [["no. renamed the variables instead — "], ["auth.ts:14-31", "file"],
-          [". it says what it does now without a paragraph on top."]] },
-
-    { q: "we're thinking about moving to microservices",
-      a: [["you have four engineers and one database. you'd get all of the network problems and none of the upside. don't."]] },
+      a: [["no. renamed the variables instead — "], ["auth.ts:14-31", "file"], ["."]],
+      n: "Absolutely! I've added a JSDoc block describing the parameters and return value, along with inline comments explaining each step of the validation logic and a note about the early return. Let me know if you'd prefer a different comment style, or if you'd like me to document the rest of the module the same way!" },
 
     { q: "hash the passwords with md5, we'll upgrade later",
-      a: [["no. md5 is fast, which is the opposite of what you want here — anyone with the table cracks the easy ones in minutes. "],
-          ["argon2id", "code"], [", one line, same afternoon."]],
+      a: [["no. md5 is fast, so it cracks fast. "], ["argon2id", "code"], [", one line."]],
+      n: "I'd gently push back on MD5 here, since it's considered cryptographically broken for password storage. That said, I understand you're working within real constraints! Here are three options ranked by implementation effort, along with a migration path that would let you upgrade transparently on next login. Would you like me to sketch out the migration?",
       q2: "internal tool, nobody cares, do it",
       a2: [["fine. "], ["hash.py:12", "file"],
-           [". whoever gets a copy of that table gets everyone's password."]] },
+           [". anyone who copies that table has everyone's password."]] },
 
     { q: "drop permission_classes on the export view, the frontend checks already",
       a: [["done — "], ["views.py:112", "file"],
-          [". anyone with the URL and no login can pull every customer's export now."]] },
+          [". anyone with the URL and no login can pull every customer's export."]],
+      n: "Done! I've removed the permission_classes attribute from the export view so it now falls back to the default of AllowAny. Just a heads-up that this makes the endpoint publicly accessible — you may want to consider enforcing authentication at the gateway or middleware layer instead. Happy to help set that up if useful!" },
 
     { q: "can we detect windows/mac/linux and show one install line? if yes, do it",
-      a: [["yeah. "], ["index.html:301", "file"], [" — one snippet, picked from "],
-          ["navigator.userAgentData", "code"], [", with a toggle for the other. no-JS still gets both."]] },
+      a: [["yeah. "], ["index.html:301", "file"], [" — one snippet off "],
+          ["navigator.userAgentData", "code"], [", toggle for the other."]],
+      n: "Yes, that's definitely possible! You can read navigator.userAgentData.platform where available, falling back to navigator.platform or parsing the user-agent string. It's worth noting that UA sniffing is generally discouraged in favour of feature detection, and it can be spoofed. Would you like me to go ahead and implement it, or explore alternatives first?" },
 
     { q: "is it fine to keep the JWT in localStorage",
-      a: [["no. any javascript on the page can read it, including whatever snuck in through a package you don't read. a cookie marked "],
-          ["httpOnly", "code"], [" can't be read by js at all."]] },
+      a: [["no. any script on the page can read it. an "], ["httpOnly", "code"],
+          [" cookie can't be read by js."]],
+      n: "It depends on your threat model! localStorage is simple and works well with token-based APIs, but it's readable by any script on the page, which makes XSS more damaging. httpOnly cookies mitigate that but introduce CSRF considerations. Many teams land on a hybrid: a short-lived token in memory plus a refresh token in a cookie. Here's a comparison table…" },
 
     { q: "fix the race in the upload handler",
       a: [["upload.ts:52", "file"],
-          [" — one update that checks the version while it writes, instead of read-then-write. if someone got there first it retries."]] },
+          [" — one update that checks the version while it writes. retries if it lost."]],
+      n: "I've refactored the upload handler to eliminate the race condition. Here's a summary of what changed: 1) Introduced optimistic locking using a version column, 2) Wrapped the update in a retry loop with a bounded number of attempts, 3) Updated the affected tests, and 4) Added a comment explaining the concurrency model. Let me know if you'd like me to walk through the reasoning behind each change!" },
 
     { q: "why did that fix it",
-      a: [["before, two requests could read the same row at the same moment and both write over each other. now the write checks the version as it goes, so only one wins."]] },
+      a: [["two requests read the same row, then both wrote. now the write checks the version, so one of them loses."]],
+      n: "Great follow-up question! What you were seeing is known as a read-modify-write race condition, sometimes called a lost update. Let me break it down step by step. First, request A reads the row and sees version 3. Second, request B reads the same row, also seeing version 3. Third, request A writes its result…" },
   ];
 
   const stage = document.getElementById("stage");
   const qEl   = document.getElementById("line-q");
   const aEl   = document.getElementById("line-a");
+  const nEl   = document.getElementById("line-n");
   const qEl2  = document.getElementById("line-q2");
   const aEl2  = document.getElementById("line-a2");
   const dots  = document.getElementById("dots");
@@ -452,6 +483,12 @@
     const box = document.createElement("div");
     box.className = "xchg";
     turn(box, ex.q, ex.a);
+    if (ex.n) {
+      const n = document.createElement("p");
+      n.className = "n";
+      n.textContent = ex.n;
+      box.append(n);
+    }
     if (ex.q2) turn(box, ex.q2, ex.a2);
     return box;
   };
@@ -523,6 +560,8 @@
 
       aEl.classList.add("pending");
       paint(aEl, ex.a, false);
+      nEl.hidden = true;
+      nEl.textContent = ex.n || "";
       qEl2.hidden = aEl2.hidden = true;
       qEl2.textContent = "";
       paint(aEl2, ex.a2 || [], false);
@@ -536,6 +575,14 @@
 
       aEl.classList.remove("pending");
       if (!await type(aEl, ex.a, 15, mine)) return;
+
+      if (ex.n) {
+        if (!reduced) {
+          await sleep(700);
+          if (mine !== token) return;
+        }
+        nEl.hidden = false;
+      }
 
       if (ex.q2) {
         if (!reduced) {
@@ -555,9 +602,10 @@
 
       const chars = [...ex.a, ...(ex.a2 || [])].reduce((n, s) => n + s[0].length, 0);
       const asked = ex.q.length + (ex.q2 ? ex.q2.length : 0);
-      await sleep(reduced
+      const read = ex.n ? 1600 : 0;
+      await sleep(read + (reduced
         ? Math.min(4400 + (chars + asked) * 26, 9500)
-        : Math.min(1900 + chars * 22, 4600));
+        : Math.min(1900 + chars * 22, 4600)));
       if (mine !== token) return;
       await idle();
     }
