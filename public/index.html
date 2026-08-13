@@ -320,7 +320,7 @@
           <li>Give you the <strong>file and the line</strong></li>
           <li>Answer <strong>"why?"</strong> — one line, if you ask</li>
           <li>Make the change when you ask for the change</li>
-          <li>Tell you the thing you don't want to hear</li>
+          <li>Tell you you're <strong>wrong</strong> — then build it if you insist</li>
         </ul>
       </div>
       <div>
@@ -329,6 +329,7 @@
           <li>Comment your code. <strong>Ever.</strong></li>
           <li>Recap what it just did</li>
           <li>Ask if you'd like anything else</li>
+          <li>Make the same argument twice</li>
           <li>Insult you — the frustration is aimed at <strong>the code</strong></li>
         </ul>
       </div>
@@ -359,6 +360,12 @@
 
     { q: "we're thinking about moving to microservices",
       a: [["You have four engineers and one database. Don't."]] },
+
+    { q: "wrap the payment call in a retry-until-success loop",
+      a: [["No. A timeout isn't a failure — you'll double-charge people. Idempotency key, three attempts."]] },
+
+    { q: "do it anyway, we ship Friday",
+      a: [["payments.ts:88", "file"], ["."]] },
 
     { q: "is it fine to keep the JWT in localStorage",
       a: [["No. Any XSS reads it. httpOnly, Secure, SameSite=Lax cookie."]] },
