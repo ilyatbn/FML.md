@@ -279,6 +279,15 @@
 
   .cols { display: grid; gap: 40px; }
   @media (min-width: 720px) { .cols { grid-template-columns: 1fr 1fr; gap: 44px; } }
+
+  .terms .cols {
+    background: rgba(11, 11, 13, .45);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 22px 24px;
+    backdrop-filter: blur(3px);
+  }
+  @media (min-width: 720px) { .terms .cols { padding: 26px 28px; } }
   .cols h3 {
     font-size: 13px;
     font-weight: 500;
@@ -355,7 +364,7 @@
     </p>
   </section>
 
-  <section>
+  <section class="terms">
     <h2>Terms of engagement</h2>
     <div class="cols">
       <div>
