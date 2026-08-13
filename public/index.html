@@ -133,6 +133,16 @@
     overflow: hidden;
   }
 
+  #stage { display: flex; flex-direction: column; overflow: hidden; }
+  #stage .q, #stage .a { flex: 0 0 auto; }
+  #stage:not(.two) .n:not([hidden]) {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 1.9em), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 1.9em), transparent);
+  }
+
   .q::before, .a::before, .n::before {
     position: absolute;
     left: 0;
@@ -506,7 +516,7 @@
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const lockHeight = () => {
-    stage.style.minHeight = "";
+    stage.style.height = "";
     const ghost = exchange(EX[0]);
     ghost.style.cssText =
       `position:absolute;top:0;left:-9999px;visibility:hidden;width:${stage.offsetWidth}px`;
@@ -517,7 +527,7 @@
       tallest = Math.max(tallest, ghost.offsetHeight);
     }
     ghost.remove();
-    stage.style.minHeight = `${tallest}px`;
+    stage.style.height = `${tallest}px`;
   };
 
   const cursor = document.createElement("span");
@@ -570,6 +580,7 @@
       paint(aEl, ex.a, false);
       nEl.hidden = true;
       nEl.textContent = ex.n || "";
+      stage.classList.toggle("two", !!ex.q2);
       qEl2.hidden = aEl2.hidden = true;
       qEl2.textContent = "";
       paint(aEl2, ex.a2 || [], false);
