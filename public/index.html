@@ -30,7 +30,7 @@
 
   body {
     margin: 0;
-    background: var(--bg);
+    background: #2d2f3a;
     color: var(--text);
     font-family: var(--mono);
     font-size: 15px;
@@ -44,7 +44,7 @@
 
   /* ---- header ---- */
 
-  header { padding: 88px 0 56px; }
+  header { padding: 10px 0 10px; }
 
   h1 {
     font-size: clamp(38px, 11vw, 64px);
@@ -62,7 +62,7 @@
   }
   .expand {
     margin: 6px 0 0;
-    color: var(--muted);
+    color: #8aa2a7;
     font-size: 13px;
   }
   .expand b { color: var(--red); font-weight: 400; }
@@ -216,6 +216,20 @@
     cursor: pointer;
     transition: color .15s, border-color .15s;
   }
+  .swap {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    padding: 0;
+    margin: 2px 0 16px;
+    cursor: pointer;
+  }
+  .swap:hover { color: var(--amber); border-bottom-color: #4a3a1e; }
+  .swap:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
   .copy:hover { color: var(--amber); border-color: #4a3a1e; }
   .copy:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
   .copy[data-state="ok"]   { color: var(--green); border-color: #24402c; }
@@ -272,7 +286,7 @@
   <header>
     <h1>fml<span class="dot">.</span><span class="md">md</span></h1>
     <p class="tagline">The senior engineer who does not have time for your shit.</p>
-    <p class="expand">↳ <b>f</b>uck <b>m</b>y <b>l</b>ife<span style="opacity:.5">, they want something from me again.</span></p>
+    <p class="expand">↳ <b>f</b>uck <b>m</b>y <b>l</b>ife<span style="opacity:.7">, they want something from me again.</span></p>
     <p class="lede">
       A skill for <a href="https://claude.com/claude-code">Claude Code</a>. 
       After nine days on call, he's got no patience left. </br>
@@ -297,13 +311,15 @@
 
   <section>
     <h2>Install</h2>
-    <div class="snippet">
-      <pre><span class="p">$</span> curl -fsSL https://fml.md/install | sh</pre>
+    <div class="snippet" id="install-posix">
+      <pre><span class="c"># macos / linux</span>
+<span class="p">$</span> curl -fsSL https://fml.md/install | sh</pre>
     </div>
-    <div class="snippet">
-      <pre class="alt"><span class="c"># windows</span>
+    <div class="snippet" id="install-windows">
+      <pre><span class="c"># windows</span>
 <span class="p">&gt;</span> irm https://fml.md/install.ps1 | iex</pre>
     </div>
+    <button type="button" class="swap" id="swap" hidden></button>
     <p style="color:var(--muted);margin:0">
       It asks whether you want it globally or in this repo only, then drops the skill
       and the <code>/fml</code> command where Claude Code will find them. </br>
@@ -592,6 +608,25 @@
 
     snippet.appendChild(btn);
   });
+})();
+
+(() => {
+  const posix = document.getElementById("install-posix");
+  const win   = document.getElementById("install-windows");
+  const swap  = document.getElementById("swap");
+  const ua    = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent;
+
+  let windows = /win/i.test(ua);
+
+  const render = () => {
+    posix.hidden = windows;
+    win.hidden = !windows;
+    swap.textContent = windows ? "not on Windows?" : "on Windows?";
+  };
+
+  swap.hidden = false;
+  swap.addEventListener("click", () => { windows = !windows; render(); });
+  render();
 })();
 </script>
 </body>
