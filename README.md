@@ -14,6 +14,8 @@ comments in the code.
 | `.claude/skills/fml/SKILL.md` | The skill. Source of truth. |
 | `.claude/commands/fml.md` | The `/fml` slash command. |
 | `public/` | The site. Static, no framework. |
+| `public/install` | POSIX `sh` installer served at `fml.md/install`. |
+| `public/install.ps1` | The Windows equivalent. |
 | `scripts/build.mjs` | Copies the two files above into `public/fml/` so they're downloadable. |
 | `wrangler.jsonc` | Cloudflare Workers static-assets config. |
 
@@ -48,7 +50,27 @@ Alternatively, wire the repo to Cloudflare Pages with build command
 Inside this repo it's already live — `/fml <question>`. Elsewhere:
 
 ```sh
-mkdir -p ~/.claude/skills/fml ~/.claude/commands
-curl -fsSL https://fml.md/fml/SKILL.md -o ~/.claude/skills/fml/SKILL.md
-curl -fsSL https://fml.md/fml/fml.md   -o ~/.claude/commands/fml.md
+curl -fsSL https://fml.md/install | sh
 ```
+
+```powershell
+irm https://fml.md/install.ps1 | iex
+```
+
+The installer asks whether you want it in `~/.claude` (every project) or
+`./.claude` (this repo). Skip the question with `--global` / `--local`:
+
+```sh
+curl -fsSL https://fml.md/install | sh -s -- --local
+```
+
+PowerShell has no argument passing through `iex`, so it reads `$env:FML_SCOPE`
+(`global` or `local`) instead. Both honour `FML_BASE` for testing against a local
+`wrangler dev`:
+
+```sh
+curl -fsSL http://127.0.0.1:8787/install | FML_BASE=http://127.0.0.1:8787 sh -s -- --local
+```
+
+The prompt reads from `/dev/tty`, so it still works through a pipe. With no
+terminal at all (CI), it says so and installs globally.

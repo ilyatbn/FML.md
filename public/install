@@ -1,0 +1,112 @@
+#!/bin/sh
+# fml.md installer — https://fml.md
+#
+#   curl -fsSL https://fml.md/install | sh
+#   curl -fsSL https://fml.md/install | sh -s -- --local
+#
+set -eu
+
+BASE="${FML_BASE:-https://fml.md}"
+
+if [ -t 1 ] && [ -z "${NO_COLOR:-}" ]; then
+  A='\033[33m'; D='\033[2m'; R='\033[31m'; O='\033[0m'
+else
+  A=''; D=''; R=''; O=''
+fi
+
+say() { printf '%b\n' "$*"; }
+die() { printf '%b\n' "${R}fml:${O} $*" >&2; exit 1; }
+
+usage() {
+  say "fml.md installer"
+  say ""
+  say "  --global, -g   install into ~/.claude          (every project)"
+  say "  --local,  -l   install into ./.claude          (this repo only)"
+  say "  --help,   -h   this"
+  say ""
+  say "With no flag it asks. Piped into a non-interactive shell, it goes global."
+}
+
+if command -v curl >/dev/null 2>&1; then
+  fetch() { curl -fsSL "$1" -o "$2"; }
+elif command -v wget >/dev/null 2>&1; then
+  fetch() { wget -qO "$2" "$1"; }
+else
+  die "no curl, no wget. Install one."
+fi
+
+scope=""
+for arg in "$@"; do
+  case "$arg" in
+    -g|--global)               scope=global ;;
+    -l|--local|--repo|--here)  scope=local ;;
+    -h|--help)                 usage; exit 0 ;;
+    *)                         die "unknown option: $arg" ;;
+  esac
+done
+
+# [ -r /dev/tty ] is a liar when there's no controlling terminal — open it and see.
+tty_ok=no
+if ( : < /dev/tty ) 2>/dev/null; then
+  tty_ok=yes
+fi
+
+if [ -z "$scope" ]; then
+  if [ "$tty_ok" = yes ]; then
+    say ""
+    say "  Where do you want it?"
+    say ""
+    say "    ${A}g${O}  global   ${D}~/.claude — every project${O}"
+    say "    ${A}r${O}  repo     ${D}$PWD/.claude${O}"
+    say ""
+    printf '%b' "  [${A}G${O}/r] "
+    read -r ans < /dev/tty 2>/dev/null || ans=""
+    say ""
+    case "$ans" in
+      g|G|global|"")      scope=global ;;
+      r|R|repo|l|L|local) scope=local ;;
+      *)                  die "didn't catch that. Re-run with --global or --local." ;;
+    esac
+  else
+    scope=global
+    say "${D}Nothing to read from, so: global. Pass --local to scope it to a repo.${O}"
+  fi
+fi
+
+if [ "$scope" = global ]; then
+  root="$HOME/.claude"
+else
+  root="$PWD/.claude"
+  if [ ! -d .git ]; then
+    say "${D}No .git here — installing into $root anyway.${O}"
+  fi
+fi
+
+skills="$root/skills/fml"
+cmds="$root/commands"
+
+verb="installed"
+if [ -f "$skills/SKILL.md" ]; then
+  verb="updated"
+fi
+
+tmp="$(mktemp -d 2>/dev/null || mktemp -d -t fml)"
+trap 'rm -rf "$tmp"' EXIT INT TERM
+
+fetch "$BASE/fml/SKILL.md" "$tmp/SKILL.md" || die "couldn't fetch $BASE/fml/SKILL.md"
+fetch "$BASE/fml/fml.md"   "$tmp/fml.md"   || die "couldn't fetch $BASE/fml/fml.md"
+
+head -n 3 "$tmp/SKILL.md" | grep -q '^name: fml$' \
+  || die "that download wasn't SKILL.md. Check $BASE and try again."
+
+mkdir -p "$skills" "$cmds"
+mv "$tmp/SKILL.md" "$skills/SKILL.md"
+mv "$tmp/fml.md"   "$cmds/fml.md"
+
+say ""
+say "  ${A}fml $verb.${O}"
+say "    ${D}skill  ${O} $skills/SKILL.md"
+say "    ${D}command${O} $cmds/fml.md"
+say ""
+say "  Run ${A}/fml${O} <question>. Restart Claude Code if it's already open."
+say ""

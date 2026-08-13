@@ -192,6 +192,31 @@
   }
   pre .c { color: var(--muted); }
   pre .p { color: var(--amber); user-select: none; }
+  pre.alt { background: none; color: var(--muted); }
+
+  .snippet { position: relative; }
+  .snippet pre { padding-right: 82px; }
+
+  .copy {
+    position: absolute;
+    top: 9px;
+    right: 9px;
+    font-family: inherit;
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: #1d1d23;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 4px 9px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .copy:hover { color: var(--amber); border-color: #4a3a1e; }
+  .copy:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .copy[data-state="ok"]   { color: var(--green); border-color: #24402c; }
+  .copy[data-state="fail"] { color: var(--red);   border-color: #4a2323; }
 
   /* ---- rules ---- */
 
@@ -267,16 +292,21 @@
 
   <section>
     <h2>Install</h2>
-    <pre><span class="c"># the skill</span>
-<span class="p">$</span> mkdir -p ~/.claude/skills/fml
-<span class="p">$</span> curl -fsSL https://fml.md/fml/SKILL.md -o ~/.claude/skills/fml/SKILL.md
-
-<span class="c"># the /fml command</span>
-<span class="p">$</span> mkdir -p ~/.claude/commands
-<span class="p">$</span> curl -fsSL https://fml.md/fml/fml.md -o ~/.claude/commands/fml.md</pre>
+    <div class="snippet">
+      <pre><span class="p">$</span> curl -fsSL https://fml.md/install | sh</pre>
+    </div>
+    <div class="snippet">
+      <pre class="alt"><span class="c"># windows</span>
+<span class="p">&gt;</span> irm https://fml.md/install.ps1 | iex</pre>
+    </div>
     <p style="color:var(--muted);margin:0">
-      Then <code>/fml why is this 400ing</code>. Drop the <code>~/.claude</code> for
-      <code>.claude</code> to scope it to one repo.
+      It asks whether you want it globally or in this repo only, then drops the skill
+      and the <code>/fml</code> command where Claude Code will find them.
+      Skip the question with <code>| sh -s -- --global</code> or <code>--local</code>.
+      Reading it first is the correct instinct — <a href="/install">it's right here</a>.
+    </p>
+    <p style="color:var(--muted);margin:14px 0 0">
+      Then <code>/fml why is this 400ing</code>.
     </p>
   </section>
 
@@ -464,6 +494,61 @@
 
   lockHeight();
   loop(0);
+})();
+
+(() => {
+  // The command minus the prompt marker and any comment lines.
+  const command = (pre) => {
+    const clone = pre.cloneNode(true);
+    clone.querySelectorAll(".p, .c").forEach(n => n.remove());
+    return clone.textContent
+      .split("\n")
+      .map(l => l.trim())
+      .filter(Boolean)
+      .join("\n");
+  };
+
+  const write = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      ta.setAttribute("readonly", "");
+      ta.style.cssText = "position:fixed;top:0;left:-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      let ok = false;
+      try { ok = document.execCommand("copy"); } catch { ok = false; }
+      ta.remove();
+      return ok;
+    }
+  };
+
+  document.querySelectorAll(".snippet").forEach(snippet => {
+    const pre = snippet.querySelector("pre");
+    const text = command(pre);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy";
+    btn.textContent = "copy";
+    btn.setAttribute("aria-label", `Copy: ${text}`);
+
+    let reset;
+    btn.addEventListener("click", async () => {
+      const ok = await write(text);
+      btn.textContent = ok ? "copied" : "ctrl-c it";
+      btn.dataset.state = ok ? "ok" : "fail";
+      clearTimeout(reset);
+      reset = setTimeout(() => {
+        btn.textContent = "copy";
+        delete btn.dataset.state;
+      }, 1600);
+    });
+
+    snippet.appendChild(btn);
+  });
 })();
 </script>
 </body>

@@ -8,3 +8,11 @@
   Content-Type: text/plain; charset=utf-8
   Access-Control-Allow-Origin: *
   Cache-Control: public, max-age=300
+
+/install
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300
+
+/install.ps1
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=300
