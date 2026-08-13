@@ -542,7 +542,7 @@
     const b = document.createElement("button");
     b.type = "button";
     b.setAttribute("aria-label", `Example ${i + 1}: ${ex.q}`);
-    b.addEventListener("click", () => loop(i));
+    b.addEventListener("click", () => loop(i, true));
     dots.appendChild(b);
     return b;
   });
@@ -570,8 +570,9 @@
     return mine === token;
   }
 
-  async function loop(start) {
+  async function loop(start, manual = false) {
     const mine = ++token;
+    let dwell = manual ? 4 : 1;
     for (let i = start; mine === token; i = (i + 1) % EX.length) {
       const ex = EX[i];
       mark(i);
@@ -622,11 +623,12 @@
       const chars = [...ex.a, ...(ex.a2 || [])].reduce((n, s) => n + s[0].length, 0);
       const asked = ex.q.length + (ex.q2 ? ex.q2.length : 0);
       const read = ex.n ? 1600 : 0;
-      await sleep(read + (reduced
+      await sleep(dwell * (read + (reduced
         ? Math.min(4400 + (chars + asked) * 26, 9500)
-        : Math.min(1900 + chars * 22, 4600)));
+        : Math.min(1900 + chars * 22, 4600))));
       if (mine !== token) return;
       await idle();
+      dwell = 1;
     }
   }
 

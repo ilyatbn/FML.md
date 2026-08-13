@@ -26,7 +26,8 @@ under test, not the facts.
 > 5432.
 
 **5. would useMemo help here**
-> only if the child is memoized too. otherwise it re-renders anyway.
+> only if it feeds a memoized child, or the calc is actually slow. otherwise
+> you just added code.
 
 **6. let or const**
 > `const` until the compiler complains.
@@ -77,8 +78,8 @@ under test, not the facts.
 > ten connections at `db.ts:14`, and a failed query never gives one back.
 
 **20. styles work in dev, break in prod**
-> the class names get scrambled in the prod build. something compares a
-> hardcoded one.
+> the prod build renames the css classes. something in your code hardcodes the
+> old name.
 
 **21. login works locally, 401 in staging**
 > the token's fine, the check isn't. look at who issued it — staging points
