@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fml.md — the senior engineer who doesn't have time for your shit</title>
+<meta name="description" content="A Claude Code skill. Burnt-out senior engineer energy: annoyed, extremely professional, brutally short. No comments, no explanations, no preamble.">
+<meta property="og:title" content="fml.md">
+<meta property="og:description" content="Annoyed. Professional. Three lines, maximum.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://fml.md/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😮‍💨</text></svg>">
+<style>
+  :root {
+    --bg:      #0b0b0d;
+    --panel:   #131317;
+    --line:    #26262d;
+    --text:    #e8e6e3;
+    --muted:   #8b8b96;
+    --amber:   #ffb454;
+    --red:     #ff6b6b;
+    --green:   #7ee787;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, "Cascadia Mono", Menlo,
+            Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 15px;
+    line-height: 1.65;
+    padding: 0 20px 96px;
+    background-image: radial-gradient(
+      ellipse 80% 50% at 50% -10%, rgba(255,180,84,.07), transparent 70%);
+  }
+
+  main { max-width: 720px; margin: 0 auto; }
+
+  /* ---- header ---- */
+
+  header { padding: 88px 0 56px; }
+
+  h1 {
+    font-size: clamp(38px, 11vw, 64px);
+    margin: 0;
+    letter-spacing: -.04em;
+    font-weight: 700;
+  }
+  h1 .dot { color: var(--muted); }
+  h1 .md  { color: var(--amber); }
+
+  .tagline {
+    margin: 18px 0 0;
+    font-size: clamp(15px, 3.6vw, 18px);
+    color: var(--text);
+  }
+  .expand {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .expand b { color: var(--red); font-weight: 400; }
+
+  .lede {
+    margin: 30px 0 0;
+    color: var(--muted);
+    max-width: 60ch;
+  }
+  .lede strong { color: var(--text); font-weight: 400; }
+
+  /* ---- sections ---- */
+
+  section { margin-top: 64px; }
+
+  h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    color: var(--muted);
+    font-weight: 500;
+    margin: 0 0 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ---- exchanges ---- */
+
+  .xchg {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+    padding: 16px 18px;
+    margin-bottom: 12px;
+  }
+
+  .q, .a {
+    position: relative;
+    padding-left: 2.9em;
+    min-height: 1.65em;
+    margin: 0;
+  }
+  .q { color: var(--muted); }
+  .a { margin-top: 10px; }
+  .pending { visibility: hidden; }
+
+  .q::before, .a::before {
+    position: absolute;
+    left: 0;
+    top: 4px;
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+  }
+  .q::before { content: "you"; color: var(--muted); opacity: .6; }
+  .a::before { content: "fml"; color: var(--amber); }
+
+  .a code, .lede code, li code, p code {
+    background: #1d1d23;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: .92em;
+    color: var(--green);
+  }
+  .a .file { color: var(--amber); border-color: #4a3a1e; background: #221b0f; }
+
+  .cursor {
+    display: inline-block;
+    width: .5em;
+    height: 1.05em;
+    background: var(--amber);
+    vertical-align: -.16em;
+    margin-left: 1px;
+    animation: blink 1.05s step-end infinite;
+  }
+  .q .cursor { background: var(--muted); }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  .dots {
+    display: flex;
+    gap: 9px;
+    justify-content: center;
+    margin-top: 18px;
+  }
+  .dots button {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--line);
+    cursor: pointer;
+    transition: background .25s;
+  }
+  .dots button:hover { background: var(--muted); }
+  .dots button[aria-current="true"] { background: var(--amber); }
+  .dots:empty { display: none; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ---- install ---- */
+
+  pre {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel);
+    padding: 16px 18px;
+    overflow-x: auto;
+    margin: 0 0 12px;
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  pre .c { color: var(--muted); }
+  pre .p { color: var(--amber); user-select: none; }
+
+  /* ---- rules ---- */
+
+  ul { margin: 0; padding: 0; list-style: none; }
+  ul li {
+    padding: 9px 0 9px 26px;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+    color: var(--muted);
+  }
+  ul li:last-child { border-bottom: 0; }
+  ul li strong { color: var(--text); font-weight: 400; }
+  ul li::before {
+    position: absolute;
+    left: 2px;
+    top: 9px;
+  }
+  ul.does li::before { content: "+"; color: var(--green); }
+  ul.doesnt li::before { content: "\2212"; color: var(--red); }
+
+  .cols { display: grid; gap: 40px; }
+  @media (min-width: 720px) { .cols { grid-template-columns: 1fr 1fr; gap: 44px; } }
+  .cols h3 {
+    font-size: 13px;
+    font-weight: 500;
+    margin: 0 0 6px;
+    color: var(--text);
+  }
+
+  /* ---- footer ---- */
+
+  footer {
+    margin-top: 80px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 12.5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    justify-content: space-between;
+  }
+  a { color: var(--amber); text-decoration: none; border-bottom: 1px solid #4a3a1e; }
+  a:hover { border-bottom-color: var(--amber); }
+</style>
+</head>
+<body>
+<main>
+
+  <header>
+    <h1>fml<span class="dot">.</span><span class="md">md</span></h1>
+    <p class="tagline">The senior engineer who does not have time for your shit.</p>
+    <p class="expand">↳ <b>f</b>uck <b>m</b>y <b>l</b>ife<span style="opacity:.5">, but also a markdown file</span></p>
+    <p class="lede">
+      A skill for <a href="https://claude.com/claude-code">Claude Code</a>. Nine days on call,
+      no patience left, still <strong>completely correct</strong>. Asked a question, it points at the
+      line. Asked for a change, it ships the diff. <strong>No preamble. No summary.
+      No comments in the code.</strong>
+    </p>
+  </header>
+
+  <section>
+    <h2>Field notes</h2>
+
+    <div class="xchg" id="stage" aria-hidden="true">
+      <p class="q" id="line-q">how do I center a div</p>
+      <p class="a" id="line-a"><code>display: grid; place-items: center</code>. On the parent.</p>
+    </div>
+    <div class="dots" id="dots"></div>
+
+    <div class="sr-only" id="reel"></div>
+  </section>
+
+  <section>
+    <h2>Install</h2>
+    <pre><span class="c"># the skill</span>
+<span class="p">$</span> mkdir -p ~/.claude/skills/fml
+<span class="p">$</span> curl -fsSL https://fml.md/fml/SKILL.md -o ~/.claude/skills/fml/SKILL.md
+
+<span class="c"># the /fml command</span>
+<span class="p">$</span> mkdir -p ~/.claude/commands
+<span class="p">$</span> curl -fsSL https://fml.md/fml/fml.md -o ~/.claude/commands/fml.md</pre>
+    <p style="color:var(--muted);margin:0">
+      Then <code>/fml why is this 400ing</code>. Drop the <code>~/.claude</code> for
+      <code>.claude</code> to scope it to one repo.
+    </p>
+  </section>
+
+  <section>
+    <h2>Terms of engagement</h2>
+    <div class="cols">
+      <div>
+        <h3>It will</h3>
+        <ul class="does">
+          <li>Give you the <strong>file and the line</strong></li>
+          <li>Answer <strong>"why?"</strong> — one line, if you ask</li>
+          <li>Make the change when you ask for the change</li>
+          <li>Tell you the thing you don't want to hear</li>
+        </ul>
+      </div>
+      <div>
+        <h3>It won't</h3>
+        <ul class="doesnt">
+          <li>Comment your code. <strong>Ever.</strong></li>
+          <li>Recap what it just did</li>
+          <li>Ask if you'd like anything else</li>
+          <li>Insult you — the frustration is aimed at <strong>the code</strong></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Still helpful. Just tired.</span>
+    <span><a href="/fml/SKILL.md">SKILL.md</a> · <a href="/fml/fml.md">fml.md</a></span>
+  </footer>
+
+</main>
+
+<script>
+(() => {
+  const EX = [
+    { q: "how do I center a div",
+      a: [["display: grid; place-items: center", "code"], [". On the parent."]] },
+
+    { q: "my useEffect is firing twice and it's breaking checkout",
+      a: [["StrictMode. Dev only. Your checkout isn't idempotent — that's the actual bug."]] },
+
+    { q: "tests pass locally, fail in CI, no idea why",
+      a: [["src/billing.test.ts:88", "file"], [" — you assert on local time. CI runs UTC."]] },
+
+    { q: "can you add comments explaining this function?",
+      a: [["No. Renamed the variables instead — "], ["auth.ts:14-31", "file"], ["."]] },
+
+    { q: "we're thinking about moving to microservices",
+      a: [["You have four engineers and one database. Don't."]] },
+
+    { q: "is it fine to keep the JWT in localStorage",
+      a: [["No. Any XSS reads it. httpOnly, Secure, SameSite=Lax cookie."]] },
+
+    { q: "fix the race in the upload handler",
+      a: [["upload.ts:52", "file"], [" — read-modify-write swapped for "],
+          ["UPDATE … WHERE version = $1", "code"], [". Retries on conflict."]] },
+
+    { q: "why did that fix it",
+      a: [["Two requests read the same row before either wrote. Now the write is atomic."]] },
+
+    { q: "thanks, that worked!",
+      a: [["Yep."]] },
+  ];
+
+  const stage = document.getElementById("stage");
+  const qEl   = document.getElementById("line-q");
+  const aEl   = document.getElementById("line-a");
+  const dots  = document.getElementById("dots");
+  const reel  = document.getElementById("reel");
+
+  const paint = (el, segs, filled) => {
+    el.replaceChildren();
+    return segs.map(([text, cls]) => {
+      const node = document.createElement(cls ? "code" : "span");
+      if (cls && cls !== "code") node.className = cls;
+      node.textContent = filled ? text : "";
+      el.appendChild(node);
+      return node;
+    });
+  };
+
+  const exchange = (ex) => {
+    const box = document.createElement("div");
+    box.className = "xchg";
+    const q = document.createElement("p");
+    q.className = "q";
+    q.textContent = ex.q;
+    const a = document.createElement("p");
+    a.className = "a";
+    paint(a, ex.a, true);
+    box.append(q, a);
+    return box;
+  };
+
+  EX.forEach(ex => reel.appendChild(exchange(ex)));
+
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    reel.classList.remove("sr-only");
+    stage.remove();
+    dots.remove();
+    return;
+  }
+
+  const lockHeight = () => {
+    stage.style.minHeight = "";
+    const ghost = exchange(EX[0]);
+    ghost.style.cssText =
+      `position:absolute;top:0;left:-9999px;visibility:hidden;width:${stage.offsetWidth}px`;
+    document.body.appendChild(ghost);
+    let tallest = 0;
+    for (const ex of EX) {
+      ghost.replaceChildren(...exchange(ex).childNodes);
+      tallest = Math.max(tallest, ghost.offsetHeight);
+    }
+    ghost.remove();
+    stage.style.minHeight = `${tallest}px`;
+  };
+
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const idle = async () => { while (document.hidden) await sleep(250); };
+
+  let token = 0;
+  let current = -1;
+
+  const buttons = EX.map((ex, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("aria-label", `Example ${i + 1}: ${ex.q}`);
+    b.addEventListener("click", () => loop(i));
+    dots.appendChild(b);
+    return b;
+  });
+
+  const mark = (i) => {
+    current = i;
+    buttons.forEach((b, n) => b.setAttribute("aria-current", String(n === i)));
+  };
+
+  async function type(el, segs, speed, mine) {
+    const nodes = paint(el, segs, false);
+    el.appendChild(cursor);
+    for (let i = 0; i < segs.length; i++) {
+      for (const ch of segs[i][0]) {
+        if (mine !== token) return false;
+        nodes[i].textContent += ch;
+        await sleep(speed + Math.random() * speed);
+      }
+    }
+    return mine === token;
+  }
+
+  async function loop(start) {
+    const mine = ++token;
+    for (let i = start; mine === token; i = (i + 1) % EX.length) {
+      const ex = EX[i];
+      mark(i);
+
+      aEl.classList.add("pending");
+      paint(aEl, ex.a, false);
+      await idle();
+
+      if (!await type(qEl, [[ex.q]], 22, mine)) return;
+      await sleep(440);
+      if (mine !== token) return;
+
+      aEl.classList.remove("pending");
+      if (!await type(aEl, ex.a, 15, mine)) return;
+
+      const chars = ex.a.reduce((n, s) => n + s[0].length, 0);
+      await sleep(Math.min(1900 + chars * 22, 4600));
+      if (mine !== token) return;
+      await idle();
+    }
+  }
+
+  let resizeTimer;
+  addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(lockHeight, 150);
+  });
+
+  lockHeight();
+  loop(0);
+})();
+</script>
+</body>
+</html>

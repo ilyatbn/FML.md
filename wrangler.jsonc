@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fml-md",
+  "compatibility_date": "2026-08-13",
+
+  // Static-assets-only Worker: no `main`, no code, just ./public on the edge.
+  // Run `npm run build` first — it copies the skill into public/fml/.
+  "assets": {
+    "directory": "./public",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+
+  // Uncomment once fml.md is an active zone on this Cloudflare account
+  // (Add a site -> update the registrar's nameservers -> wait for "Active").
+  // "routes": [
+  //   { "pattern": "fml.md", "custom_domain": true },
+  //   { "pattern": "www.fml.md", "custom_domain": true }
+  // ],
+
+  "observability": {
+    "enabled": true
+  }
+}
