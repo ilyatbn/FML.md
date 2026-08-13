@@ -148,6 +148,7 @@
   }
   .q .cursor { background: var(--muted); }
   @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .cursor { display: none; } }
 
   .dots {
     display: flex;
@@ -405,12 +406,7 @@
 
   EX.forEach(ex => reel.appendChild(exchange(ex)));
 
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    reel.classList.remove("sr-only");
-    stage.remove();
-    dots.remove();
-    return;
-  }
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const lockHeight = () => {
     stage.style.minHeight = "";
@@ -450,6 +446,11 @@
   };
 
   async function type(el, segs, speed, mine) {
+    if (reduced) {
+      if (mine !== token) return false;
+      paint(el, segs, true);
+      return true;
+    }
     const nodes = paint(el, segs, false);
     el.appendChild(cursor);
     for (let i = 0; i < segs.length; i++) {
@@ -473,8 +474,10 @@
       await idle();
 
       if (!await type(qEl, [[ex.q]], 22, mine)) return;
-      await sleep(440);
-      if (mine !== token) return;
+      if (!reduced) {
+        await sleep(440);
+        if (mine !== token) return;
+      }
 
       aEl.classList.remove("pending");
       if (!await type(aEl, ex.a, 15, mine)) return;
