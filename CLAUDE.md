@@ -5,8 +5,12 @@ sounds like.
 
 ## Source of truth
 
-- `.claude/skills/fml/SKILL.md` — the skill.
-- `.claude/commands/fml.md` — the `/fml` command.
+- `.claude/skills/fml/SKILL.md` — the skill. One file, four harnesses.
+- `.claude/commands/fml.md` — the `/fml` command for Claude Code.
+- `assets/commands/fml.opencode.md` — the same command for opencode. Codex and
+  Hermes surface the skill directly, so they get no command file.
+- `public/install` decides where each harness keeps its skills. If one of them
+  moves its directory, that `case` is the only place to change.
 - `public/fml/` is **generated**. Never edit it; run `npm run build`.
 
 ## The reel is the skill's test

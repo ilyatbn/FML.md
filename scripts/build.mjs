@@ -8,6 +8,7 @@ const out = resolve(root, "public/fml");
 const files = [
   [".claude/skills/fml/SKILL.md", "SKILL.md"],
   [".claude/commands/fml.md", "fml.md"],
+  ["assets/commands/fml.opencode.md", "fml.opencode.md"],
 ];
 
 await rm(out, { recursive: true, force: true });

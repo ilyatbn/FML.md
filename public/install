@@ -2,7 +2,8 @@
 # fml.md installer — https://fml.md
 #
 #   curl -fsSL https://fml.md/install | sh
-#   curl -fsSL https://fml.md/install | sh -s -- --local
+#   curl -fsSL https://fml.md/install | sh -s -- opencode
+#   curl -fsSL https://fml.md/install | sh -s -- codex --local
 #
 set -eu
 
@@ -20,11 +21,17 @@ die() { printf '%b\n' "${R}fml:${O} $*" >&2; exit 1; }
 usage() {
   say "fml.md installer"
   say ""
-  say "  --global, -g   install into ~/.claude          (every project)"
-  say "  --local,  -l   install into ./.claude          (this repo only)"
+  say "  claude         Claude Code        ~/.claude          (default)"
+  say "  opencode       opencode           ~/.config/opencode"
+  say "  codex          Codex CLI          ~/.agents"
+  say "  hermes         Hermes             ~/.hermes"
+  say ""
+  say "  --global, -g   install for every project"
+  say "  --local,  -l   install into this repo only"
   say "  --help,   -h   this"
   say ""
-  say "With no flag it asks. Piped into a non-interactive shell, it goes global."
+  say "With no harness it assumes Claude Code. With no scope it asks; piped into a"
+  say "non-interactive shell, it goes global."
 }
 
 if command -v curl >/dev/null 2>&1; then
@@ -36,14 +43,38 @@ else
 fi
 
 scope=""
+agent="${FML_AGENT:-}"
 for arg in "$@"; do
   case "$arg" in
     -g|--global)               scope=global ;;
     -l|--local|--repo|--here)  scope=local ;;
     -h|--help)                 usage; exit 0 ;;
+    claude|--claude|claude-code|--claude-code)  agent=claude ;;
+    opencode|--opencode)                        agent=opencode ;;
+    codex|--codex)                              agent=codex ;;
+    hermes|--hermes)                            agent=hermes ;;
     *)                         die "unknown option: $arg" ;;
   esac
 done
+[ -n "$agent" ] || agent=claude
+
+# label, global root, local root, command filename ("" = skill doubles as the command)
+case "$agent" in
+  claude)
+    label="Claude Code"; groot="$HOME/.claude";          lroot="$PWD/.claude"
+    cmdsrc="fml.md";          invoke="/fml" ;;
+  opencode)
+    label="opencode";   groot="$HOME/.config/opencode";  lroot="$PWD/.opencode"
+    cmdsrc="fml.opencode.md"; invoke="/fml" ;;
+  codex)
+    label="Codex CLI";  groot="$HOME/.agents";           lroot="$PWD/.agents"
+    cmdsrc="";                invoke="\$fml" ;;
+  hermes)
+    label="Hermes";     groot="$HOME/.hermes";           lroot="$PWD/.hermes"
+    cmdsrc="";                invoke="/fml" ;;
+  *)
+    die "don't know that harness: $agent. One of claude, opencode, codex, hermes." ;;
+esac
 
 # [ -r /dev/tty ] is a liar when there's no controlling terminal — open it and see.
 tty_ok=no
@@ -54,10 +85,10 @@ fi
 if [ -z "$scope" ]; then
   if [ "$tty_ok" = yes ]; then
     say ""
-    say "  Where do you want it?"
+    say "  ${label}. Where do you want it?"
     say ""
-    say "    ${A}g${O}  global   ${D}~/.claude — every project${O}"
-    say "    ${A}r${O}  repo     ${D}$PWD/.claude${O}"
+    say "    ${A}g${O}  global   ${D}$groot — every project${O}"
+    say "    ${A}r${O}  repo     ${D}$lroot${O}"
     say ""
     printf '%b' "  [${A}G${O}/r] "
     read -r ans < /dev/tty 2>/dev/null || ans=""
@@ -74,9 +105,9 @@ if [ -z "$scope" ]; then
 fi
 
 if [ "$scope" = global ]; then
-  root="$HOME/.claude"
+  root="$groot"
 else
-  root="$PWD/.claude"
+  root="$lroot"
   if [ ! -d .git ]; then
     say "${D}No .git here — installing into $root anyway.${O}"
   fi
@@ -94,19 +125,27 @@ tmp="$(mktemp -d 2>/dev/null || mktemp -d -t fml)"
 trap 'rm -rf "$tmp"' EXIT INT TERM
 
 fetch "$BASE/fml/SKILL.md" "$tmp/SKILL.md" || die "couldn't fetch $BASE/fml/SKILL.md"
-fetch "$BASE/fml/fml.md"   "$tmp/fml.md"   || die "couldn't fetch $BASE/fml/fml.md"
 
 head -n 3 "$tmp/SKILL.md" | grep -q '^name: fml$' \
   || die "that download wasn't SKILL.md. Check $BASE and try again."
 
-mkdir -p "$skills" "$cmds"
+mkdir -p "$skills"
 mv "$tmp/SKILL.md" "$skills/SKILL.md"
-mv "$tmp/fml.md"   "$cmds/fml.md"
+
+if [ -n "$cmdsrc" ]; then
+  fetch "$BASE/fml/$cmdsrc" "$tmp/cmd.md" || die "couldn't fetch $BASE/fml/$cmdsrc"
+  mkdir -p "$cmds"
+  mv "$tmp/cmd.md" "$cmds/fml.md"
+fi
 
 say ""
-say "  ${A}fml $verb.${O}"
+say "  ${A}fml $verb for $label.${O}"
 say "    ${D}skill  ${O} $skills/SKILL.md"
-say "    ${D}command${O} $cmds/fml.md"
+if [ -n "$cmdsrc" ]; then
+  say "    ${D}command${O} $cmds/fml.md"
+else
+  say "    ${D}command${O} the skill is the command"
+fi
 say ""
-say "  Run ${A}/fml${O} <question>. Restart Claude Code if it's already open."
+say "  Run ${A}$invoke${O} <question>. Restart $label if it's already open."
 say ""

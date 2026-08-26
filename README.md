@@ -1,6 +1,7 @@
 # fml.md
 
-A Claude Code skill, and the site that hands it out.
+An agent skill, and the site that hands it out. Works in Claude Code, opencode,
+Codex CLI and Hermes — it's a `SKILL.md`, so anything that reads those can run it.
 
 **fml** is the senior engineer who has been on call for nine days. Visibly
 annoyed, relentlessly professional, brutally short. Asked a question, it points
@@ -12,11 +13,12 @@ comments in the code.
 | Path | What |
 | --- | --- |
 | `.claude/skills/fml/SKILL.md` | The skill. Source of truth. |
-| `.claude/commands/fml.md` | The `/fml` slash command. |
+| `.claude/commands/fml.md` | The `/fml` slash command, Claude Code flavour. |
+| `assets/commands/fml.opencode.md` | The same command, opencode flavour. |
 | `public/` | The site. Static, no framework. |
 | `public/install` | POSIX `sh` installer served at `fml.md/install`. |
 | `public/install.ps1` | The Windows equivalent. |
-| `scripts/build.mjs` | Copies the two files above into `public/fml/` so they're downloadable. |
+| `scripts/build.mjs` | Copies the three files above into `public/fml/` so they're downloadable. |
 | `wrangler.jsonc` | Cloudflare Workers static-assets config. |
 
 `public/fml/` is generated and gitignored — edit the originals in `.claude/`.
@@ -57,16 +59,44 @@ curl -fsSL https://fml.md/install | sh
 irm https://fml.md/install.ps1 | iex
 ```
 
-The installer asks whether you want it in `~/.claude` (every project) or
-`./.claude` (this repo). Skip the question with `--global` / `--local`:
+With no argument it installs for Claude Code. Name another harness to install it
+there instead:
 
 ```sh
-curl -fsSL https://fml.md/install | sh -s -- --local
+curl -fsSL https://fml.md/install | sh -s -- opencode
+curl -fsSL https://fml.md/install | sh -s -- codex
+curl -fsSL https://fml.md/install | sh -s -- hermes
+```
+
+Each one has its own layout, so the installer picks the paths:
+
+| Harness | Global | In a repo | Invoke |
+| --- | --- | --- | --- |
+| Claude Code | `~/.claude` | `./.claude` | `/fml` |
+| opencode | `~/.config/opencode` | `./.opencode` | `/fml` |
+| Codex CLI | `~/.agents` | `./.agents` | `$fml` |
+| Hermes | `~/.hermes` | `./.hermes` | `/fml` |
+
+The skill lands in `<root>/skills/fml/SKILL.md` everywhere. Claude Code and
+opencode also get a `<root>/commands/fml.md`; Codex and Hermes surface the skill
+directly, so there's nothing to add.
+
+The installer asks whether you want it globally (every project) or in this repo
+only. Skip the question with `--global` / `--local`:
+
+```sh
+curl -fsSL https://fml.md/install | sh -s -- opencode --local
 ```
 
 PowerShell has no argument passing through `iex`, so it reads `$env:FML_SCOPE`
-(`global` or `local`) instead. Both honour `FML_BASE` for testing against a local
-`wrangler dev`:
+(`global` or `local`) and `$env:FML_AGENT` (`claude`, `opencode`, `codex`,
+`hermes`) instead:
+
+```powershell
+$env:FML_AGENT='codex'; irm https://fml.md/install.ps1 | iex
+```
+
+Both honour `FML_BASE` for testing against a local `wrangler dev`:
 
 ```sh
 curl -fsSL http://127.0.0.1:8787/install | FML_BASE=http://127.0.0.1:8787 sh -s -- --local

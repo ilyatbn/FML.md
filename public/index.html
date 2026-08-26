@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>fml.md — the senior engineer who doesn't have time for your shit</title>
-<meta name="description" content="A Claude Code skill for people without time to read garbage. extremely professional, brutally short. No comments, no explanations, no preamble.">
+<meta name="description" content="A harness skill for people without time to read garbage. extremely professional, brutally short. No comments, no explanations, no preamble. Claude Code, opencode, Codex, Hermes.">
 <meta property="og:title" content="fml.md">
-<meta property="og:description" content="Annoyed. Professional. Conice. Claude that gets shit done.">
+<meta property="og:description" content="Annoyed. Professional. Concise. An agent that gets shit done.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://fml.md/">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>😮‍💨</text></svg>">
@@ -233,6 +233,30 @@
   .snippet { position: relative; }
   .snippet pre { padding-right: 82px; }
 
+  .tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 12px;
+  }
+  .tab {
+    font-family: inherit;
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 5px 11px;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab[aria-selected="true"] {
+    color: var(--amber);
+    border-color: #4a3a1e;
+    background: #1d1d23;
+  }
+
   .copy {
     position: absolute;
     top: 9px;
@@ -330,7 +354,9 @@
     <p class="tagline">The senior engineer who does not have time for your shit.</p>
     <p class="expand">↳ <b>f</b>uck <b>m</b>y <b>l</b>ife<span style="opacity:.7">, they want something from me again.</span></p>
     <p class="lede">
-      A skill for <a href="https://claude.com/claude-code">Claude Code</a>. 
+      A <code>skill</code> for coding agents (Harnesses) <a href="https://claude.com/claude-code">Claude Code</a>,
+      <a href="https://opencode.ai">Opencode</a>, <a href="https://developers.openai.com/codex/cli">Codex</a> and 
+      <a href="https://hermes-agent.nousresearch.com">Hermes</a>.
       After nine days on call, he's got no patience left. </br>
       Asked a question, it points at the line. Asked for a change, it ships the diff.</br>
       <strong>No preamble. No summary. No comments. No time wasted. Better token efficiency!</strong>
@@ -354,23 +380,30 @@
 
   <section>
     <h2>Install</h2>
+    <div class="tabs" id="harness" role="tablist" aria-label="Which agent">
+      <button type="button" class="tab" role="tab" data-agent="claude"   aria-selected="true">Claude Code</button>
+      <button type="button" class="tab" role="tab" data-agent="opencode" aria-selected="false">opencode</button>
+      <button type="button" class="tab" role="tab" data-agent="codex"    aria-selected="false">Codex</button>
+      <button type="button" class="tab" role="tab" data-agent="hermes"   aria-selected="false">Hermes</button>
+    </div>
     <div class="snippet" id="install-posix">
       <pre><span class="c"># macos / linux</span>
-<span class="p">$</span> curl -fsSL https://fml.md/install | sh</pre>
+<span class="p">$</span> <span id="cmd-posix">curl -fsSL https://fml.md/install | sh</span></pre>
     </div>
     <div class="snippet" id="install-windows">
       <pre><span class="c"># windows</span>
-<span class="p">&gt;</span> irm https://fml.md/install.ps1 | iex</pre>
+<span class="p">&gt;</span> <span id="cmd-win">irm https://fml.md/install.ps1 | iex</span></pre>
     </div>
     <button type="button" class="swap" id="swap" hidden></button>
     <p style="color:var(--muted);margin:0">
       It asks whether you want it globally or in this repo only, then drops the skill
-      and the <code>/fml</code> command where Claude Code will find them. </br>
-      Skip the question with <code>| sh -s -- --global</code> or <code>--local</code>. </br>
+      where <span id="agent-name">Claude Code</span> looks for it —
+      <code id="agent-path">~/.claude/skills/fml</code>. </br>
+      Skip the question with <code id="agent-skip">| sh -s -- --global</code> or <code>--local</code>. </br>
       Reading it first is the correct instinct — <a href="/install">it's right here</a>.
     </p>
     <p style="color:var(--muted);margin:14px 0 0">
-      Then <code>/fml why is this 400ing</code>.
+      Then <code><span id="agent-invoke">/fml</span> why is this 400ing</code>.
     </p>
   </section>
 
@@ -448,7 +481,7 @@
       n: "Done! I've removed the permission_classes attribute from the export view so it now falls back to the default of AllowAny. Just a heads-up that this makes the endpoint publicly accessible — you may want to consider enforcing authentication at the gateway or middleware layer instead. Happy to help set that up if useful!" },
 
     { q: "can we detect windows/mac/linux and show one install line? if yes, do it",
-      a: [["yeah. "], ["index.html:301", "file"], [" — one snippet off "],
+      a: [["yeah. "], ["index.html:754", "file"], [" — one snippet off "],
           ["navigator.userAgentData", "code"], [", toggle for the other."]],
       n: "Yes, that's definitely possible! You can read navigator.userAgentData.platform where available, falling back to navigator.platform or parsing the user-agent string. It's worth noting that UA sniffing is generally discouraged in favour of feature detection, and it can be spoofed. Would you like me to go ahead and implement it, or explore alternatives first?" },
 
@@ -674,16 +707,16 @@
 
   document.querySelectorAll(".snippet").forEach(snippet => {
     const pre = snippet.querySelector("pre");
-    const text = command(pre);
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "copy";
     btn.textContent = "copy";
-    btn.setAttribute("aria-label", `Copy: ${text}`);
+    btn.setAttribute("aria-label", "Copy the install command");
 
     let reset;
+    // Read the line at click time — the harness tabs rewrite it.
     btn.addEventListener("click", async () => {
-      const ok = await write(text);
+      const ok = await write(command(pre));
       btn.textContent = ok ? "copied" : "ctrl-c it";
       btn.dataset.state = ok ? "ok" : "fail";
       clearTimeout(reset);
@@ -698,18 +731,50 @@
 })();
 
 (() => {
+  // Where each harness keeps its skills, and what the installer needs to be told.
+  const AGENTS = {
+    claude:   { name: "Claude Code", path: "~/.claude/skills/fml",          arg: "",         invoke: "/fml" },
+    opencode: { name: "opencode",    path: "~/.config/opencode/skills/fml", arg: "opencode", invoke: "/fml" },
+    codex:    { name: "Codex",       path: "~/.agents/skills/fml",          arg: "codex",    invoke: "$fml" },
+    hermes:   { name: "Hermes",      path: "~/.hermes/skills/fml",          arg: "hermes",   invoke: "/fml" },
+  };
+
   const posix = document.getElementById("install-posix");
   const win   = document.getElementById("install-windows");
   const swap  = document.getElementById("swap");
-  const ua    = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent;
+  const tabs  = [...document.querySelectorAll("#harness .tab")];
+  const out   = {
+    posix:  document.getElementById("cmd-posix"),
+    win:    document.getElementById("cmd-win"),
+    name:   document.getElementById("agent-name"),
+    path:   document.getElementById("agent-path"),
+    skip:   document.getElementById("agent-skip"),
+    invoke: document.getElementById("agent-invoke"),
+  };
+  const ua = navigator.userAgentData?.platform || navigator.platform || navigator.userAgent;
 
   let windows = /win/i.test(ua);
+  let agent = "claude";
 
   const render = () => {
+    const a = AGENTS[agent];
+
+    out.posix.textContent = `curl -fsSL https://fml.md/install | sh${a.arg ? ` -s -- ${a.arg}` : ""}`;
+    out.win.textContent = a.arg
+      ? `$env:FML_AGENT='${a.arg}'; irm https://fml.md/install.ps1 | iex`
+      : "irm https://fml.md/install.ps1 | iex";
+    out.name.textContent = a.name;
+    out.path.textContent = a.path;
+    out.skip.textContent = `| sh -s -- ${a.arg ? `${a.arg} ` : ""}--global`;
+    out.invoke.textContent = a.invoke;
+
+    tabs.forEach(t => t.setAttribute("aria-selected", String(t.dataset.agent === agent)));
     posix.hidden = windows;
     win.hidden = !windows;
     swap.textContent = windows ? "not on Windows?" : "on Windows?";
   };
+
+  tabs.forEach(t => t.addEventListener("click", () => { agent = t.dataset.agent; render(); }));
 
   swap.hidden = false;
   swap.addEventListener("click", () => { windows = !windows; render(); });
