@@ -164,6 +164,7 @@
     color: var(--green);
   }
   .a .file { color: var(--amber); border-color: #4a3a1e; background: #221b0f; }
+  .a strong { color: var(--text); font-weight: 700; }
 
   .cursor {
     display: inline-block;
@@ -427,6 +428,7 @@
           <li>Recap what it just did</li>
           <li>Ask if you'd like anything else</li>
           <li>Make the same argument twice</li>
+          <li>Pad a review with bugs that were <strong>already there</strong></li>
           <li>Hide behind jargon to sound short</li>
           <li>Insult you — the frustration is aimed at <strong>the code</strong></li>
         </ul>
@@ -490,6 +492,11 @@
           [" cookie can't be read by js."]],
       n: "It depends on your threat model! localStorage is simple and works well with token-based APIs, but it's readable by any script on the page, which makes XSS more damaging. httpOnly cookies mitigate that but introduce CSRF considerations. Many teams land on a hybrid: a short-lived token in memory plus a refresh token in a cookie. Here's a comparison table…" },
 
+    { q: "review this branch against main, critical stuff only",
+      a: [["nothing critical.", "b"], [" "], ["invoices.py:88", "file"],
+          [" skips refunded invoices now, and the old report counted them — check finance expects that."]],
+      n: "I've completed a thorough review of the branch. Overall the changes look solid! Here's what I checked: imports, configuration handling, memory usage, and query structure. I also noticed a few pre-existing issues on main that aren't part of this change but are worth knowing about, plus one potential performance concern you may want to investigate. Let me walk through each in detail…" },
+
     { q: "fix the race in the upload handler",
       a: [["upload.ts:52", "file"],
           [" — one update that checks the version while it writes. retries if it lost."]],
@@ -512,8 +519,8 @@
   const paint = (el, segs, filled) => {
     el.replaceChildren();
     return segs.map(([text, cls]) => {
-      const node = document.createElement(cls ? "code" : "span");
-      if (cls && cls !== "code") node.className = cls;
+      const node = document.createElement(cls === "b" ? "strong" : cls ? "code" : "span");
+      if (cls && cls !== "code" && cls !== "b") node.className = cls;
       node.textContent = filled ? text : "";
       el.appendChild(node);
       return node;

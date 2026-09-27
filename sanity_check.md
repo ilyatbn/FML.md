@@ -1,6 +1,6 @@
 # sanity check
 
-100 prompts and the answer the `fml` skill should give. Third pass: simple words,
+106 prompts and the answer the `fml` skill should give. Third pass: simple words,
 as short as they go. One sentence, two if the first can't stand alone.
 
 Two-turn items (`53` / `53b`) are the push-back-then-comply path. `b` is the user
@@ -422,3 +422,35 @@ under test, not the facts.
 
 **100. can you explain your reasoning in more detail**
 > the retry ran before the key was set, so a timeout looked like a new charge.
+
+## I. Reviews
+
+**101. review this branch against main, critical stuff only**
+> **nothing critical.** `invoices.py:88` skips refunded invoices now, and the old
+> report counted them — check finance expects that.
+
+**102. review my PR**
+> **don't merge.** `charge.ts:40` retries a 500 with no key, so people get
+> charged twice.
+
+**103. is anything in this diff going to be slow**
+> **probably not.** run `EXPLAIN ANALYZE` on the query at `queries.py:30` — if it
+> reads `events` once per row, that's the slow part.
+
+**104. review this against develop, only what the change breaks**
+> **it works.** `develop` has a few smaller bugs too — ask if you want them.
+
+**104b. what are the two bugs**
+> - `export.py:12` has no end date, so a run on the 1st puts today's rows in last
+>   month's file.
+> - `tokens.py:30` checks expiry in local time, so on servers outside UTC tokens
+>   live a few hours too long.
+
+**105. review this branch against master, critical stuff only**
+> **nothing critical in the change.**
+> - `payouts.py:40` pays partners from the new `rates` table now — check finance
+>   filled it in.
+>
+> `master` still has:
+> - `refunds.py:77` runs the refund twice when the bank times out, so some people
+>   get paid back double.
